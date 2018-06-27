@@ -1,0 +1,40 @@
+version: "2"
+
+services:
+  sut:
+    container_name: scheduler_service_1
+    image: scheduler_service:latest
+    volumes:
+      - "./:/go/src/github.com/ahlusar1989/scheduling_service"
+    depends_on:
+      - rabbitmq
+      - redis
+    links:
+      - rabbitmq
+      - redis
+    build:
+      context: .
+      dockerfile: ./Dockerfile.test
+    environment:
+      AMQP_URL: 'amqp://guest:guest@rabbitmq:5672/'
+      REDIS_URL: 'redis:6379'
+      SQS_URL: ${SQS_URL}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+      AWS_REGION: 'us-west-2'
+
+  rabbitmq:
+    container_name: scheduling_service_1_rabbitmq
+    image: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    logging:
+      driver: none
+
+  redis:
+    container_name: scheduling_service_1_redis
+    image: redis
+    logging:
+      driver: none
