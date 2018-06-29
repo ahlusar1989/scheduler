@@ -9,9 +9,9 @@ import (
     "io/ioutil"
     "os"	
     "net/smtp"
+    "database/sql"
+    _ "github.com/go-sql-driver/mysql"    
 	"github.com/ahlusar1989/scheduling_service/v1/log"
-
-	// "gopkg.in/gomail.v2"
 )
 
 // Add ...
@@ -120,4 +120,48 @@ func MakeRequest() error {
         fmt.Printf("%s\n", string(contents))
     }
     return nil
+}
+
+
+type Task struct {
+	ID   int    `json:"task_id"`
+	Name string `json:"subject"`
+	Description string `json:"description"`
+}
+
+func ReadDB() error {
+		// Open up our database connection.
+	db, err := sql.Open("mysql", "test:test@tcp(192.168.99.100:3306)/session")
+
+	// if there is an error opening the connection, handle it
+	if err != nil {
+   		fmt.Printf("%s\n", err.Error())		
+		log.INFO.Print(err.Error())
+		return err
+	}
+	defer db.Close()
+
+	// Execute the query
+	results, err := db.Query("SELECT task_id, subject, description FROM tasks")
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+		panic(err.Error()) // proper error handling instead of panic in your app
+		return err
+	}
+
+	for results.Next() {
+		var task Task
+		// for each row, scan the result into our tasks composite object
+		err = results.Scan(&task.ID, &task.Name, &task.Description)
+		if err != nil {
+			fmt.Printf("%s\n", err.Error())	
+			panic(err.Error()) // proper error handling instead of panic in your app
+			return err
+		}
+        // and then print out the tasks's Name attribute
+		fmt.Printf("%s\n", task.Name)
+		fmt.Printf("%s\n", task.ID)
+		fmt.Printf("%s\n", task.Description)			
+	}
+	return nil
 }

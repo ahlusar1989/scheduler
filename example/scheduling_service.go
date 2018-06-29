@@ -106,6 +106,7 @@ func startServer() (*scheduling_service.Server, error) {
 		"long_running_task": exampletasks.LongRunningTask,
 		"email_task": exampletasks.SendEmail,
 		"make_request": exampletasks.MakeRequest,
+		"read_db": exampletasks.ReadDB,
 	}
 
 	return server, server.RegisterTasks(tasks)
@@ -151,7 +152,8 @@ func send() error {
 		panicTask                                         tasks.Signature
 		longRunningTask                                   tasks.Signature
 		emailTask                                         tasks.Signature
-		makeRequest 								      tasks.Signature 		 
+		makeRequest 								      tasks.Signature
+		readDBMethod									  tasks.Signature	 
 	)
 
 	var initTasks = func() {
@@ -266,6 +268,10 @@ func send() error {
 		makeRequest = tasks.Signature{
 			Name: "make_request",
 		}
+
+		readDBMethod = tasks.Signature{
+			Name: "read_db",
+		}
 	}
 
 	/*
@@ -316,6 +322,11 @@ func send() error {
 	if err != nil {
 		return fmt.Errorf("Could not send request task: %s", err.Error())
 	}
+
+	asyncResult, err = server.SendTaskWithContext(ctx, &readDBMethod)
+	if err != nil {
+		return fmt.Errorf("Could not send db task: %s", err.Error())
+	}	
 
 	/*
 	 * Try couple of tasks with a slice argument and slice return value
