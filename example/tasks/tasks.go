@@ -160,7 +160,7 @@ func ReadDB() error {
 		}
         // and then print out the tasks's Name attribute
 		fmt.Printf("%s\n", task.Name)
-		fmt.Printf("%s\n", task.ID)
+		fmt.Printf("%d\n", task.ID)
 		fmt.Printf("%s\n", task.Description)			
 	}
 	return nil
