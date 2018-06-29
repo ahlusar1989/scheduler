@@ -299,11 +299,23 @@ func send() error {
 		return fmt.Errorf("Could not send task: %s", err.Error())
 	}
 
+
 	results, err := asyncResult.Get(time.Duration(time.Millisecond * 5))
 	if err != nil {
 		return fmt.Errorf("Getting task result failed with error: %s", err.Error())
 	}
 	log.INFO.Printf("1 + 1 = %v\n", tasks.HumanReadableResults(results))
+
+
+	asyncResult, err = server.SendTaskWithContext(ctx, &emailTask)
+	if err != nil {
+		return fmt.Errorf("Could not send email task: %s", err.Error())
+	}
+
+	asyncResult, err = server.SendTaskWithContext(ctx, &makeRequest)
+	if err != nil {
+		return fmt.Errorf("Could not send request task: %s", err.Error())
+	}
 
 	/*
 	 * Try couple of tasks with a slice argument and slice return value
@@ -360,7 +372,7 @@ func send() error {
 	initTasks()
 	log.INFO.Println("Group of tasks (parallel execution):")
 
-	group, err := tasks.NewGroup(&addTask0, &addTask1, &addTask2, &makeRequest, &emailTask)
+	group, err := tasks.NewGroup(&addTask0, &addTask1, &addTask2)
 	if err != nil {
 		return fmt.Errorf("Error creating group: %s", err.Error())
 	}

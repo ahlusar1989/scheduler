@@ -57,12 +57,12 @@ func TestGetRegisteredTaskNames(t *testing.T) {
 func getTestServer(t *testing.T) *scheduling_service.Server {
 	server, err := scheduling_service.NewServer(&config.Config{
 		Broker:        "amqp://guest:guest@localhost:5672/",
-		DefaultQueue:  "machinery_tasks",
+		DefaultQueue:  "scheduled_tasks",
 		ResultBackend: "redis://127.0.0.1:6379",
 		AMQP: &config.AMQPConfig{
 			Exchange:      "machinery_exchange",
 			ExchangeType:  "direct",
-			BindingKey:    "machinery_task",
+			BindingKey:    "scheduled_task",
 			PrefetchCount: 1,
 		},
 	})

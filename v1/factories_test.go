@@ -89,11 +89,11 @@ func TestBrokerFactory(t *testing.T) {
 
 	cnf = config.Config{
 		Broker:       "amqp://guest:guest@localhost:5672/",
-		DefaultQueue: "machinery_tasks",
+		DefaultQueue: "scheduled_tasks",
 		AMQP: &config.AMQPConfig{
 			Exchange:      "machinery_exchange",
 			ExchangeType:  "direct",
-			BindingKey:    "machinery_task",
+			BindingKey:    "scheduled_task",
 			PrefetchCount: 1,
 		},
 	}
@@ -119,7 +119,7 @@ func TestBrokerFactory(t *testing.T) {
 	// with password
 	cnf = config.Config{
 		Broker:       "redis://password@localhost:6379",
-		DefaultQueue: "machinery_tasks",
+		DefaultQueue: "scheduled_tasks",
 	}
 
 	actual, err = scheduling_service.BrokerFactory(&cnf)
@@ -141,7 +141,7 @@ func TestBrokerFactory(t *testing.T) {
 	// without password
 	cnf = config.Config{
 		Broker:       "redis://localhost:6379",
-		DefaultQueue: "machinery_tasks",
+		DefaultQueue: "scheduled_tasks",
 	}
 
 	actual, err = scheduling_service.BrokerFactory(&cnf)
@@ -163,7 +163,7 @@ func TestBrokerFactory(t *testing.T) {
 	// using a socket file
 	cnf = config.Config{
 		Broker:       "redis+socket:///tmp/redis.sock",
-		DefaultQueue: "machinery_tasks",
+		DefaultQueue: "scheduled_tasks",
 	}
 
 	actual, err = scheduling_service.BrokerFactory(&cnf)
@@ -185,7 +185,7 @@ func TestBrokerFactory(t *testing.T) {
 	// 3) AWS SQS
 	cnf = config.Config{
 		Broker:       "https://sqs.us-east-2.amazonaws.com/123456789012",
-		DefaultQueue: "machinery_tasks",
+		DefaultQueue: "scheduled_tasks",
 	}
 
 	actual, err = scheduling_service.BrokerFactory(&cnf)

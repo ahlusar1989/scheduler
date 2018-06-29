@@ -13,13 +13,13 @@ var (
 	// Start with sensible default values
 	defaultCnf = &Config{
 		Broker:          "amqp://guest:guest@localhost:5672/",
-		DefaultQueue:    "machinery_tasks",
+		DefaultQueue:    "scheduled_tasks",
 		ResultBackend:   "amqp://guest:guest@localhost:5672/",
 		ResultsExpireIn: 3600,
 		AMQP: &AMQPConfig{
 			Exchange:      "machinery_exchange",
 			ExchangeType:  "direct",
-			BindingKey:    "machinery_task",
+			BindingKey:    "scheduled_task",
 			PrefetchCount: 3,
 		},
 		DynamoDB: &DynamoDBConfig{

@@ -8,15 +8,10 @@ import (
     "net/http"
     "io/ioutil"
     "os"	
-	"crypto/tls"
-	"net/smtp"
-
+    "net/smtp"
 	"github.com/ahlusar1989/scheduling_service/v1/log"
 
-    "bytes"
-    "runtime"
-    "strings"
-    "text/template"
+	// "gopkg.in/gomail.v2"
 )
 
 // Add ...
@@ -86,8 +81,28 @@ func LongRunningTask() error {
 }
 
 func SendEmail() error {
-	
-	return nil
+    log.INFO.Print("Start email task")
+    from := "ahlusar.ahluwalia@gmail.com"
+    pass := "harjeet89"
+    to := "ztc@mailinator.com"
+
+    msg := "From: " + from + "\n" +
+        "To: " + to + "\n" +
+        "Subject: Hello there\n\n" +
+        "Hello"
+
+    err := smtp.SendMail("smtp.gmail.com:587",
+        smtp.PlainAuth("", from, pass, "smtp.gmail.com"),
+        from, []string{to}, []byte(msg))
+
+    if err != nil {
+        log.FATAL.Printf("smtp error: %s", err)
+        return err
+    }
+
+    log.INFO.Print("sent, visit http://ztc.mailinator.com")
+    log.INFO.Print("Finished email")
+    return nil
 }
 
 func MakeRequest() error {
