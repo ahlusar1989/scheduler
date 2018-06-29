@@ -1,7 +1,7 @@
 # Scheduler POC for 2018 Internship
 
 
-* [First Steps](#first-steps)
+* [Getting Started](#getting-started)
 * [Configuration](#configuration)
 * [Custom Logger](#custom-logger)
 * [Server](#server)
@@ -15,16 +15,12 @@
   * [Retry Tasks](#retry-tasks)
   * [Get Pending Tasks](#get-pending-tasks)
   * [Keeping Results](#keeping-results)
-* [Workflows](#workflows)
-  * [Groups](#groups)
-  * [Chords](#chords)
-  * [Chains](#chains)
 * [Development](#development)
   * [Requirements](#requirements)
   * [Dependencies](#dependencies)
   * [Testing](#testing)
 
-### First Steps
+### Getting Started
 
 Add the Scheduling Service library to your $GOPATH/src:
 
@@ -40,17 +36,13 @@ Second, you will need to launch a worker process:
 go run example/scheduling_service.go -c example/config.yml worker
 ```
 
-![Example worker][1]
-
 Finally, once you have a worker running and waiting for tasks to consume, send some tasks:
 
 ```sh
 go run example/scheduling_service.go -c example/config.yml send
 ```
 
-You will be able to see the tasks being processed asynchronously by the worker:
-
-![Example worker receives tasks][2]
+You will be able to see the tasks being processed asynchronously by the worker.
 
 ### Configuration
 
@@ -218,7 +210,7 @@ log.Set(myCustomLogger)
 
 ### Server
 
-A Machinery library must be instantiated before use. The way this is done is by creating a `Server` instance. `Server` is a base object which stores Machinery configuration and registered tasks. E.g.:
+A Scheduling Service library must be instantiated before use. The way this is done is by creating a `Server` instance. `Server` is a base object which stores service configuration and registered tasks. E.g.:
 
 ```go
 import (
@@ -605,227 +597,6 @@ worker.SetErrorHandler(func (err error) {
 })
 ```
 
-### Workflows
-
-Running a single asynchronous task is fine but often you will want to design a workflow of tasks to be executed in an orchestrated way. There are couple of useful functions to help you design workflows.
-
-#### Groups
-
-`Group` is a set of tasks which will be executed in parallel, independent of each other. E.g.:
-
-```go
-import (
-  "github.com/ahlusar1989/scheduling_service/v1/tasks"
-  "github.com/ahlusar1989/scheduling_service/v1"
-)
-
-signature1 := tasks.Signature{
-  Name: "add",
-  Args: []tasks.Arg{
-    {
-      Type:  "int64",
-      Value: 1,
-    },
-    {
-      Type:  "int64",
-      Value: 1,
-    },
-  },
-}
-
-signature2 := tasks.Signature{
-  Name: "add",
-  Args: []tasks.Arg{
-    {
-      Type:  "int64",
-      Value: 5,
-    },
-    {
-      Type:  "int64",
-      Value: 5,
-    },
-  },
-}
-
-group, _ := tasks.NewGroup(&signature1, &signature2)
-asyncResults, err := server.SendGroup(group)
-if err != nil {
-  // failed to send the group
-  // do something with the error
-}
-```
-
-`SendGroup` returns a slice of `AsyncResult` objects. So you can do a blocking call and wait for the result of groups tasks:
-
-```go
-for _, asyncResult := range asyncResults {
-  results, err := asyncResult.Get(time.Duration(time.Millisecond * 5))
-  if err != nil {
-    // getting result of a task failed
-    // do something with the error
-  }
-  for _, result := range results {
-    fmt.Println(result.Interface())
-  }
-}
-```
-
-#### Chords
-
-`Chord` allows you to define a callback to be executed after all tasks in a group finished processing, e.g.:
-
-```go
-import (
-  "github.com/ahlusar1989/scheduling_service/v1/tasks"
-  "github.com/ahlusar1989/scheduling_service/v1"
-)
-
-signature1 := tasks.Signature{
-  Name: "add",
-  Args: []tasks.Arg{
-    {
-      Type:  "int64",
-      Value: 1,
-    },
-    {
-      Type:  "int64",
-      Value: 1,
-    },
-  },
-}
-
-signature2 := tasks.Signature{
-  Name: "add",
-  Args: []tasks.Arg{
-    {
-      Type:  "int64",
-      Value: 5,
-    },
-    {
-      Type:  "int64",
-      Value: 5,
-    },
-  },
-}
-
-signature3 := tasks.Signature{
-  Name: "multiply",
-}
-
-group := tasks.NewGroup(&signature1, &signature2)
-chord, _ := tasks.NewChord(group, &signature3)
-chordAsyncResult, err := server.SendChord(chord)
-if err != nil {
-  // failed to send the chord
-  // do something with the error
-}
-```
-
-The above example executes task1 and task2 in parallel, aggregates their results and passes them to task3. Therefore what would end up happening is:
-
-```
-multiply(add(1, 1), add(5, 5))
-```
-
-More explicitly:
-
-```
-(1 + 1) * (5 + 5) = 2 * 10 = 20
-```
-
-`SendChord` returns `ChordAsyncResult` which follows AsyncResult's interface. So you can do a blocking call and wait for the result of the callback:
-
-```go
-results, err := chordAsyncResult.Get(time.Duration(time.Millisecond * 5))
-if err != nil {
-  // getting result of a chord failed
-  // do something with the error
-}
-for _, result := range results {
-  fmt.Println(result.Interface())
-}
-```
-
-#### Chains
-
-`Chain` is simply a set of tasks which will be executed one by one, each successful task triggering the next task in the chain. E.g.:
-
-```go
-import (
-  "github.com/ahlusar1989/scheduling_service/v1/tasks"
-  "github.com/ahlusar1989/scheduling_service/v1"
-)
-
-signature1 := tasks.Signature{
-  Name: "add",
-  Args: []tasks.Arg{
-    {
-      Type:  "int64",
-      Value: 1,
-    },
-    {
-      Type:  "int64",
-      Value: 1,
-    },
-  },
-}
-
-signature2 := tasks.Signature{
-  Name: "add",
-  Args: []tasks.Arg{
-    {
-      Type:  "int64",
-      Value: 5,
-    },
-    {
-      Type:  "int64",
-      Value: 5,
-    },
-  },
-}
-
-signature3 := tasks.Signature{
-  Name: "multiply",
-  Args: []tasks.Arg{
-    {
-      Type:  "int64",
-      Value: 4,
-    },
-  },
-}
-
-chain, _ := tasks.NewChain(&signature1, &signature2, &signature3)
-chainAsyncResult, err := server.SendChain(chain)
-if err != nil {
-  // failed to send the chain
-  // do something with the error
-}
-```
-
-The above example executes task1, then task2 and then task3, passing the result of each task to the next task in the chain. Therefore what would end up happening is:
-
-```
-multiply(add(add(1, 1), 5, 5), 4)
-```
-
-More explicitly:
-
-```
-((1 + 1) + (5 + 5)) * 4 = 12 * 4 = 48
-```
-
-`SendChain` returns `ChainAsyncResult` which follows AsyncResult's interface. So you can do a blocking call and wait for the result of the whole chain:
-
-```go
-results, err := chainAsyncResult.Get(time.Duration(time.Millisecond * 5))
-if err != nil {
-  // getting result of a chain failed
-  // do something with the error
-}
-for _, result := range results {
-  fmt.Println(result.Interface())
-}
-```
 
 ### Development
 
@@ -856,7 +627,6 @@ docker run -d -p 11211:11211 memcached
 docker run -d -p 27017:27017 mongo
 docker run -d -p 6831:6831/udp -p 16686:16686 jaegertracing/all-in-one:latest
 ```
-
 
 #### Dependencies
 
