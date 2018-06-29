@@ -91,7 +91,7 @@ func TestBrokerFactory(t *testing.T) {
 		Broker:       "amqp://guest:guest@localhost:5672/",
 		DefaultQueue: "scheduled_tasks",
 		AMQP: &config.AMQPConfig{
-			Exchange:      "machinery_exchange",
+			Exchange:      "scheduler_exchange",
 			ExchangeType:  "direct",
 			BindingKey:    "scheduled_task",
 			PrefetchCount: 1,

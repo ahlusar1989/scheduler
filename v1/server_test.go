@@ -60,7 +60,7 @@ func getTestServer(t *testing.T) *scheduling_service.Server {
 		DefaultQueue:  "scheduled_tasks",
 		ResultBackend: "redis://127.0.0.1:6379",
 		AMQP: &config.AMQPConfig{
-			Exchange:      "machinery_exchange",
+			Exchange:      "scheduler_exchange",
 			ExchangeType:  "direct",
 			BindingKey:    "scheduled_task",
 			PrefetchCount: 1,

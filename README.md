@@ -60,7 +60,7 @@ cnf, err := config.NewFromYaml("config.yml", true)
 
 Second boolean flag enables live reloading of configuration every 10 seconds. Use `false` to disable live reloading.
 
-Machinery configuration is encapsulated by a `Config` struct and injected as a dependency to objects that need it.
+Scheduler configuration is encapsulated by a `Config` struct and injected as a dependency to objects that need it.
 
 #### Broker
 
@@ -116,7 +116,7 @@ var sqsClient = sqs.New(session.Must(session.NewSession(&aws.Config{
 var visibilityTimeout = 20
 var cnf = &config.Config{
   Broker:          "YOUR_SQS_URL"
-  DefaultQueue:    "machinery_tasks",
+  DefaultQueue:    "scheduler_tasks",
   ResultBackend:   "YOUR_BACKEND_URL",
   SQS: &config.SQSConfig{
     Client: sqsClient,
@@ -220,10 +220,10 @@ import (
 
 var cnf = &config.Config{
   Broker:             "amqp://guest:guest@localhost:5672/",
-  DefaultQueue:       "machinery_tasks",
+  DefaultQueue:       "scheduler_tasks",
   ResultBackend:      "amqp://guest:guest@localhost:5672/",
   AMQP:               &config.AMQPConfig{
-    Exchange:     "machinery_exchange",
+    Exchange:     "scheduler_exchange",
     ExchangeType: "direct",
     BindingKey:   "machinery_task",
   },
@@ -253,7 +253,7 @@ calls (per worker). Example: 1 will serialize task execution while 0 makes the n
 
 ### Tasks
 
-Tasks are a building block of Machinery applications. A task is a function which defines what happens when a worker receives a message.
+Tasks are a building block of Scheduler applications. A task is a function which defines what happens when a worker receives a message.
 
 Each task needs to return an error as a last return value. In addition to error tasks can now return any number of arguments.
 

@@ -17,7 +17,7 @@ var (
 		ResultBackend:   "amqp://guest:guest@localhost:5672/",
 		ResultsExpireIn: 3600,
 		AMQP: &AMQPConfig{
-			Exchange:      "machinery_exchange",
+			Exchange:      "scheduler_exchange",
 			ExchangeType:  "direct",
 			BindingKey:    "scheduled_task",
 			PrefetchCount: 3,
