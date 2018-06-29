@@ -138,11 +138,11 @@ func (b *Broker) Publish(signature *tasks.Signature) error {
 
 	// if this is a fifo queue, there needs to be some additional parameters.
 	if strings.HasSuffix(signature.RoutingKey, ".fifo") {
-		// Use Machinery's signature Task UUID as SQS Message Group ID.
+		// Use Scheduler's signature Task UUID as SQS Message Group ID.
 		MsgDedupID := signature.UUID
 		MsgInput.MessageDeduplicationId = aws.String(MsgDedupID)
 
-		// Use Machinery's signature Group UUID as SQS Message Group ID.
+		// Use Scheduler's signature Group UUID as SQS Message Group ID.
 		MsgGroupID := signature.GroupUUID
 		MsgInput.MessageGroupId = aws.String(MsgGroupID)
 	}
