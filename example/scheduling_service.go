@@ -107,6 +107,7 @@ func startServer() (*scheduling_service.Server, error) {
 		"email_task": exampletasks.SendEmail,
 		"make_request": exampletasks.MakeRequest,
 		"read_db": exampletasks.ReadDB,
+		"write_db" : exampletasks.MakeConcurrentWrites,
 	}
 
 	return server, server.RegisterTasks(tasks)
@@ -153,7 +154,8 @@ func send() error {
 		longRunningTask                                   tasks.Signature
 		emailTask                                         tasks.Signature
 		makeRequest 								      tasks.Signature
-		readDBMethod									  tasks.Signature	 
+		readDBMethod									  tasks.Signature
+		writeDBMethod									  tasks.Signature
 	)
 
 	var initTasks = func() {
@@ -272,6 +274,10 @@ func send() error {
 		readDBMethod = tasks.Signature{
 			Name: "read_db",
 		}
+
+		writeDBMethod = tasks.Signature{
+			Name: "write_db",
+		}
 	}
 
 	/*
@@ -294,7 +300,7 @@ func send() error {
 
 	log.INFO.Println("Starting batch:", batchID)
 	/*
-	 * First, let's try sending a single task
+	 * First, let's try sending some individual tasks
 	 */
 	initTasks()
 
@@ -326,7 +332,13 @@ func send() error {
 	asyncResult, err = server.SendTaskWithContext(ctx, &readDBMethod)
 	if err != nil {
 		return fmt.Errorf("Could not send db task: %s", err.Error())
-	}	
+	}
+
+
+	asyncResult, err = server.SendTaskWithContext(ctx, &writeDBMethod)
+	if err != nil {
+		return fmt.Errorf("Could not send write to db task: %s", err.Error())
+	}			
 
 	/*
 	 * Try couple of tasks with a slice argument and slice return value

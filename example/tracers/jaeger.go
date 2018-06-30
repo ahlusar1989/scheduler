@@ -3,10 +3,10 @@ package tracers
 // Uncomment the import statement for the jaeger tracer.
 // make sure you run dep ensure to pull in the jaeger client
 //
-// import (
-// 	jaeger "github.com/uber/jaeger-client-go"
-// 	jaegercfg "github.com/uber/jaeger-client-go/config"
-// )
+import (
+	jaeger "github.com/uber/jaeger-client-go"
+	jaegercfg "github.com/uber/jaeger-client-go/config"
+)
 
 // SetupTracer is the place where you'd setup your specific tracer.
 // The jaeger tracer is given as an example.
@@ -21,20 +21,20 @@ func SetupTracer(serviceName string) (func(), error) {
 
 	// Jaeger setup code
 	//
-	// config := jaegercfg.Configuration{
-	// 	Sampler: &jaegercfg.SamplerConfig{
-	// 		Type:  jaeger.SamplerTypeConst,
-	// 		Param: 1,
-	// 	},
-	// }
+	config := jaegercfg.Configuration{
+		Sampler: &jaegercfg.SamplerConfig{
+			Type:  jaeger.SamplerTypeConst,
+			Param: 1,
+		},
+	}
 
-	// closer, err := config.InitGlobalTracer(serviceName)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	closer, err := config.InitGlobalTracer(serviceName)
+	if err != nil {
+		return nil, err
+	}
 
 	cleanupFunc := func() {
-		// closer.Close()
+		closer.Close()
 	}
 
 	return cleanupFunc, nil

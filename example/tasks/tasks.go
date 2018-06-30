@@ -11,7 +11,20 @@ import (
     "net/smtp"
     "database/sql"
     _ "github.com/go-sql-driver/mysql"    
-	"github.com/ahlusar1989/scheduling_service/v1/log"
+    "github.com/ahlusar1989/scheduling_service/v1/log"
+	"sync"
+	"math/rand"
+	"runtime"
+	"runtime/pprof"
+)
+
+var (
+	DBW *sql.DB
+
+	DSN      = "test:test@tcp(192.168.99.100:3306)/session"
+	SQLQuery = "INSERT INTO `tasks`(`task_id`, `subject`, `description`)  VALUES(?, ?, ?)"
+	StmtMain *sql.Stmt
+	wg       sync.WaitGroup
 )
 
 // Add ...
@@ -82,8 +95,8 @@ func LongRunningTask() error {
 
 func SendEmail() error {
     log.INFO.Print("Start email task")
-    from := "ahlusar.ahluwalia@gmail.com"
-    pass := "harjeet89"
+    from := os.Getenv("GMAIL_EMAIL")
+    pass := os.Getenv("GMAIL_PASSWORD")
     to := "ztc@mailinator.com"
 
     msg := "From: " + from + "\n" +
@@ -163,5 +176,110 @@ func ReadDB() error {
 		fmt.Printf("%d\n", task.ID)
 		fmt.Printf("%s\n", task.Description)			
 	}
+	return nil
+}
+
+
+
+func generateRandomString(n int ) string {
+
+	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	const (
+		letterIdxBits = 6                    // 6 bits to represent a letter index
+		letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
+		letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
+	)
+
+		b := make([]byte, n)
+		// A rand.Int63() generates 63 random bits, enough for letterIdxMax letters!
+		for i, cache, remainder := n-1, rand.Int63(), letterIdxMax; i >= 0; {
+		if remainder == 0 {
+		cache, remainder = rand.Int63(), letterIdxMax
+	}
+		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
+		b[i] = letterBytes[idx]
+		i--
+	}
+		cache >>= letterIdxBits
+		remainder--
+	}
+
+		return string(b)
+}
+
+
+
+type Stub struct {
+	ID int
+	Subject string
+	Description string
+}
+
+func Store(d Stub) {
+	defer wg.Done()
+	_, err := StmtMain.Exec(d.ID, d.Subject, d.Description)
+	if err != nil {
+		log.FATAL.Println(err)
+	}
+}
+
+func MakeConcurrentWrites() error {
+
+	var (
+		errDbw  error
+		errStmt error
+	)
+	concurrencyLevel := runtime.NumCPU() * 8
+
+	DBW, errDbw = sql.Open("mysql", DSN)
+	if errDbw != nil {
+		log.FATAL.Println(errDbw)
+		return errDbw
+	}
+
+	DBW.SetMaxIdleConns(concurrencyLevel)
+	defer DBW.Close()
+
+	StmtMain, errStmt = DBW.Prepare(SQLQuery)
+	if errStmt != nil {
+		log.FATAL.Println(errStmt)
+		return errStmt
+	}
+	defer StmtMain.Close()
+	//populate data
+	data := Stub{
+		ID: 2,
+		Subject:generateRandomString(45),
+		Description: generateRandomString(45),
+	}
+
+	f, err := os.Create("cpuprofile")
+	if err != nil {
+		log.FATAL.Println(err)
+		return err
+	}
+	pprof.StartCPUProfile(f)
+	defer pprof.StopCPUProfile()
+
+	t0 := time.Now()
+	for i := 0; i < 1000000; {
+		for k := 0; k < concurrencyLevel; k++ {
+			i++
+			if i > 1000000 {
+				break
+			}
+			data.ID = i
+			data.Subject = generateRandomString(45)
+			data.Description = generateRandomString(45)
+			wg.Add(1)
+			go Store(data)
+		}
+		wg.Wait()
+		if i > 1000000 {
+			break
+		}
+	}
+	t1 := time.Now()
+	fmt.Printf("%v per second.\n", 1000000.0/t1.Sub(t0).Seconds())
 	return nil
 }
