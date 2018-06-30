@@ -649,7 +649,9 @@ make ci
 This will basically run docker-compose command:
 
 ```sh
-(docker-compose -f docker-compose.test.yml -p machinery_ci up --build -d) && (docker logs -f machinery_sut &) && (docker wait machinery_sut)
+
+(docker-compose -f docker-compose.test.yml -p scheduler_service_1 up --build -d) && (docker logs -f scheduler_service_1 &) && (docker wait scheduler_service_1)
+
 ```
 
 Alternative approach is to setup a development environment on your machine.
