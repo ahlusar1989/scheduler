@@ -1,4 +1,4 @@
-# Scheduler POC for 2018 Internship
+# Scheduling Service Version 1.0
 
 
 * [Getting Started](#getting-started)
