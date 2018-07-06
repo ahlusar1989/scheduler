@@ -1,21 +1,21 @@
 package exampletasks
 
 import (
+	"database/sql"
 	"errors"
-	"strings"
-	"time"
-    "fmt"
-    "net/http"
-    "io/ioutil"
-    "os"	
-    "net/smtp"
-    "database/sql"
-    _ "github.com/go-sql-driver/mysql"    
-    "github.com/ahlusar1989/scheduling_service/v1/log"
-	"sync"
+	"fmt"
+	"github.com/ahlusar1989/scheduling_service/v1/log"
+	_ "github.com/go-sql-driver/mysql"
+	"io/ioutil"
 	"math/rand"
+	"net/http"
+	"net/smtp"
+	"os"
 	"runtime"
 	"runtime/pprof"
+	"strings"
+	"sync"
+	"time"
 )
 
 var (
@@ -94,61 +94,60 @@ func LongRunningTask() error {
 }
 
 func SendEmail() error {
-    log.INFO.Print("Start email task")
-    from := os.Getenv("GMAIL_EMAIL")
-    pass := os.Getenv("GMAIL_PASS")
-    to := "ztc@mailinator.com"
+	log.INFO.Print("Start email task")
+	from := os.Getenv("GMAIL_EMAIL")
+	pass := os.Getenv("GMAIL_PASS")
+	to := "ztc@mailinator.com"
 
-    msg := "From: " + from + "\n" +
-        "To: " + to + "\n" +
-        "Subject: Hello there\n\n" +
-        "Hello"
+	msg := "From: " + from + "\n" +
+		"To: " + to + "\n" +
+		"Subject: Hello there\n\n" +
+		"Hello"
 
-    err := smtp.SendMail("smtp.gmail.com:587",
-        smtp.PlainAuth("", from, pass, "smtp.gmail.com"),
-        from, []string{to}, []byte(msg))
+	err := smtp.SendMail("smtp.gmail.com:587",
+		smtp.PlainAuth("", from, pass, "smtp.gmail.com"),
+		from, []string{to}, []byte(msg))
 
-    if err != nil {
-        log.FATAL.Printf("smtp error: %s", err)
-        return err
-    }
+	if err != nil {
+		log.FATAL.Printf("smtp error: %s", err)
+		return err
+	}
 
-    log.INFO.Print("sent, visit http://ztc.mailinator.com")
-    log.INFO.Print("Finished email")
-    return nil
+	log.INFO.Print("sent, visit http://ztc.mailinator.com")
+	log.INFO.Print("Finished email")
+	return nil
 }
 
 func MakeRequest() error {
 	response, err := http.Get("https://httpbin.org/get")
- 	if err != nil {
-        fmt.Printf("%s", err)
-        os.Exit(1)
-    } else {
-        defer response.Body.Close()
-        contents, err := ioutil.ReadAll(response.Body)
-        if err != nil {
-            fmt.Printf("%s", err)
-            os.Exit(1)
-        }
-        fmt.Printf("%s\n", string(contents))
-    }
-    return nil
+	if err != nil {
+		fmt.Printf("%s", err)
+		os.Exit(1)
+	} else {
+		defer response.Body.Close()
+		contents, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			fmt.Printf("%s", err)
+			os.Exit(1)
+		}
+		fmt.Printf("%s\n", string(contents))
+	}
+	return nil
 }
 
-
 type Task struct {
-	ID   int    `json:"task_id"`
-	Name string `json:"subject"`
+	ID          int    `json:"task_id"`
+	Name        string `json:"subject"`
 	Description string `json:"description"`
 }
 
 func ReadDB() error {
-		// Open up our database connection.
+	// Open up our database connection.
 	db, err := sql.Open("mysql", DSN)
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
-   		fmt.Printf("%s\n", err.Error())		
+		fmt.Printf("%s\n", err.Error())
 		log.INFO.Print(err.Error())
 		return err
 	}
@@ -167,21 +166,19 @@ func ReadDB() error {
 		// for each row, scan the result into our tasks composite object
 		err = results.Scan(&task.ID, &task.Name, &task.Description)
 		if err != nil {
-			fmt.Printf("%s\n", err.Error())	
+			fmt.Printf("%s\n", err.Error())
 			panic(err.Error()) // proper error handling instead of panic in your app
 			return err
 		}
-        // and then print out the tasks's Name attribute
+		// and then print out the tasks's Name attribute
 		fmt.Printf("%s\n", task.Name)
 		fmt.Printf("%d\n", task.ID)
-		fmt.Printf("%s\n", task.Description)			
+		fmt.Printf("%s\n", task.Description)
 	}
 	return nil
 }
 
-
-
-func generateRandomString(n int ) string {
+func generateRandomString(n int) string {
 
 	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	const (
@@ -190,31 +187,29 @@ func generateRandomString(n int ) string {
 		letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
 	)
 
-		b := make([]byte, n)
-		// A rand.Int63() generates 63 random bits, enough for letterIdxMax letters!
+	b := make([]byte, n)
+	// A rand.Int63() generates 63 random bits, enough for letterIdxMax letters!
 	for i, cache, remainder := n-1, rand.Int63(), letterIdxMax; i >= 0; {
-		
+
 		if remainder == 0 {
 			cache, remainder = rand.Int63(), letterIdxMax
 		}
-		
+
 		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
 			b[i] = letterBytes[idx]
 			i--
 		}
-		
+
 		cache >>= letterIdxBits
 		remainder--
 	}
 
-		return string(b)
+	return string(b)
 }
 
-
-
 type Stub struct {
-	ID int
-	Subject string
+	ID          int
+	Subject     string
 	Description string
 }
 
@@ -251,8 +246,8 @@ func MakeConcurrentWrites() error {
 	defer StmtMain.Close()
 	//populate data
 	data := Stub{
-		ID: 2,
-		Subject:generateRandomString(45),
+		ID:          2,
+		Subject:     generateRandomString(45),
 		Description: generateRandomString(45),
 	}
 
@@ -283,6 +278,6 @@ func MakeConcurrentWrites() error {
 		}
 	}
 	t1 := time.Now()
-	fmt.Printf("%v per second.\n", 1000000.0 / t1.Sub(t0).Seconds())
+	fmt.Printf("%v per second.\n", 1000000.0/t1.Sub(t0).Seconds())
 	return nil
 }

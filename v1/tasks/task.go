@@ -103,7 +103,7 @@ func (t *Task) Call() (taskResults []*TaskResult, err error) {
 	}
 
 	// Last returned value
-	lastResult := results[len(results) - 1]
+	lastResult := results[len(results)-1]
 
 	// If the last returned value is not nil, it has to be of error type, if that
 	// is not the case, return error message, otherwise propagate the task error
@@ -127,7 +127,7 @@ func (t *Task) Call() (taskResults []*TaskResult, err error) {
 	}
 
 	// Convert reflect values to task results
-	taskResults = make([]*TaskResult, len(results) - 1)
+	taskResults = make([]*TaskResult, len(results)-1)
 	for i := 0; i < len(results)-1; i++ {
 		val := results[i].Interface()
 		typeStr := reflect.TypeOf(val).String()

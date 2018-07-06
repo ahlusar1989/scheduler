@@ -12,7 +12,7 @@ import (
 
 // opentracing tags
 var (
-	SchedulingTag     = opentracing.Tag{Key: string(opentracing_ext.Component), Value: "scheduling_service"}
+	SchedulingTag    = opentracing.Tag{Key: string(opentracing_ext.Component), Value: "scheduling_service"}
 	WorkflowGroupTag = opentracing.Tag{Key: "scheduling_service.workflow", Value: "group"}
 	WorkflowChordTag = opentracing.Tag{Key: "scheduling_service.workflow", Value: "chord"}
 	WorkflowChainTag = opentracing.Tag{Key: "scheduling_service.workflow", Value: "chain"}
