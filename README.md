@@ -605,8 +605,6 @@ worker.SetErrorHandler(func (err error) {
 * Go
 * RabbitMQ (optional)
 * Redis (optional)
-* Memcached (optional)
-* MongoDB (optional)
 
 On OS X systems, you can install requirements using [Homebrew](http://brew.sh/):
 
@@ -614,8 +612,6 @@ On OS X systems, you can install requirements using [Homebrew](http://brew.sh/):
 brew install go
 brew install rabbitmq
 brew install redis
-brew install memcached
-brew install mongodb
 ```
 
 Or optionally use the corresponding [Docker](http://docker.io/) containers:
@@ -623,7 +619,6 @@ Or optionally use the corresponding [Docker](http://docker.io/) containers:
 ```
 docker run -d -p 5672:5672 rabbitmq
 docker run -d -p 6379:6379 redis
-docker run -d -p 11211:11211 memcached
 docker run -d -p 27017:27017 mongo
 docker run -d -p 6831:6831/udp -p 16686:16686 jaegertracing/all-in-one:latest
 ```
@@ -661,8 +656,6 @@ In order to enable integration tests, you will need to install all required serv
 ```sh
 export AMQP_URL=amqp://guest:guest@localhost:5672/
 export REDIS_URL=localhost:6379
-export MEMCACHE_URL=localhost:11211
-export MONGODB_URL=localhost:27017
 ```
 
 To run integration tests against an SQS instance, you will need to create a "test_queue" in SQS and export these environment variables:

@@ -96,7 +96,7 @@ func LongRunningTask() error {
 func SendEmail() error {
     log.INFO.Print("Start email task")
     from := os.Getenv("GMAIL_EMAIL")
-    pass := os.Getenv("GMAIL_PASSWORD")
+    pass := os.Getenv("GMAIL_PASS")
     to := "ztc@mailinator.com"
 
     msg := "From: " + from + "\n" +
@@ -144,7 +144,7 @@ type Task struct {
 
 func ReadDB() error {
 		// Open up our database connection.
-	db, err := sql.Open("mysql", "test:test@tcp(192.168.99.100:3306)/session")
+	db, err := sql.Open("mysql", DSN)
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
@@ -192,14 +192,17 @@ func generateRandomString(n int ) string {
 
 		b := make([]byte, n)
 		// A rand.Int63() generates 63 random bits, enough for letterIdxMax letters!
-		for i, cache, remainder := n-1, rand.Int63(), letterIdxMax; i >= 0; {
+	for i, cache, remainder := n-1, rand.Int63(), letterIdxMax; i >= 0; {
+		
 		if remainder == 0 {
-		cache, remainder = rand.Int63(), letterIdxMax
-	}
+			cache, remainder = rand.Int63(), letterIdxMax
+		}
+		
 		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
-		b[i] = letterBytes[idx]
-		i--
-	}
+			b[i] = letterBytes[idx]
+			i--
+		}
+		
 		cache >>= letterIdxBits
 		remainder--
 	}
@@ -280,6 +283,6 @@ func MakeConcurrentWrites() error {
 		}
 	}
 	t1 := time.Now()
-	fmt.Printf("%v per second.\n", 1000000.0/t1.Sub(t0).Seconds())
+	fmt.Printf("%v per second.\n", 1000000.0 / t1.Sub(t0).Seconds())
 	return nil
 }
